@@ -10,15 +10,13 @@ webSocket.addEventListener("open", function (event) {
 // Listen for messages.
 webSocket.addEventListener("message", function (event) {
   const rxData = JSON.parse(event.data);
-  if (rxData.path == "Vehicle.Driver.Identifier.Subject") {
-    setVehicleId(rxData.value);
+  if (rxData.path) {
+    setDomId(rxData.path, rxData.value);
   } else {
     console.log(rxData);
   }
 });
-
-// Handle toggle button
-function setVehicleId(id) {
-  var domText = document.getElementById("vehicle-driver-id");
-  domText.textContent = "Found: " + id;
+function setDomId(path, value) {
+  var domText = document.getElementById(path);
+  domText.textContent = value;
 }

@@ -34,6 +34,8 @@ let counter = 33;
 setInterval(() => {
   counter++;
   k.setFieldValue(kuksaClient, "Vehicle.Driver.Identifier.Subject", counter.toString());
+  k.setFieldValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", 45 + counter);
+  k.setFieldValueType(kuksaClient, "Vehicle.Chassis.Accelerator.PedalPosition", +counter, "uint32");
 }, 1000);
 
 // k.getCurrentValue(kuksaClient, "Vehicle.Driver.Identifier.Subject", (result) => {
@@ -72,14 +74,20 @@ wss.broadcast = (data) => {
   });
 };
 
-k.subscribe(kuksaClient, "Vehicle.Driver.Identifier.Subject", (data) => {
-  // console.log("Vehicle.Driver.Identifier.Subject Notify: ", data);
-  const jsonObj = {
-    path: "Vehicle.Driver.Identifier.Subject",
-    value: data,
-  };
-  wss.broadcast(JSON.stringify(jsonObj));
-});
+function forwardToBrowser(kuksaClient, path, wsServer) {
+  console.log("Register forward:", path);
+  k.subscribe(kuksaClient, path, (data) => {
+    const jsonObj = {
+      path: path,
+      value: data,
+    };
+    wsServer.broadcast(JSON.stringify(jsonObj));
+  });
+}
+
+forwardToBrowser(kuksaClient, "Vehicle.Driver.Identifier.Subject", wss);
+forwardToBrowser(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", wss);
+forwardToBrowser(kuksaClient, "Vehicle.Chassis.Accelerator.PedalPosition", wss);
 
 // On an incoming message over Websocket (browser) we need to execute something on the device.
 wss.on("connection", (ws) => {
