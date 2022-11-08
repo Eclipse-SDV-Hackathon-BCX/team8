@@ -1,0 +1,48 @@
+@startuml
+
+
+!define BCW lightgreen
+
+
+package JetRacer {
+
+  component manager <<velocitas>> #BCW
+  
+  component drivetrain <<actor>>
+  component presentmanager <<bluetooth/sensor>> as pm 
+  component  gamepad <<sensor>>
+  
+  interface can
+  component kuksa <<kuksa>> #BCW
+  
+
+  
+
+
+  pm <.up.> can
+  drivetrain <.up.> can
+  kuksa <.down.> can
+
+  manager <-down-> kuksa
+  kuksa <-left-> gamepad
+
+
+}
+
+
+
+package screen {
+  component hmi
+}
+
+
+package  Raspberry{ 
+
+
+}
+
+kuksa <-> hmi
+
+
+
+@enduml
