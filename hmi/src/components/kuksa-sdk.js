@@ -60,9 +60,13 @@ async function getCurrentValue(client, path, cb) {
     ],
   };
   client.Get(getRequest, (err, response) => {
-    // console.log("Get response:", response.entries[0].value);
-    const valueKey = response.entries[0].value.value;
-    cb(response.entries[0].value[valueKey]);
+    // console.log("Get response:", response.entries[0]);
+    if (response.entries[0].value) {
+      const valueKey = response.entries[0].value.value;
+      cb(response.entries[0].value[valueKey]);
+    } else {
+      cb(undefined);
+    }
   });
 }
 
@@ -81,9 +85,14 @@ async function subscribe(client, path, cb) {
   const call = client.Subscribe(subscribeRequest);
 
   call.on("data", (data) => {
-    const valueKey = data.updates[0].entry.value.value;
-    // console.log(data.updates[0].entry.value[valueKey]);
-    subscribeList[path](data.updates[0].entry.value[valueKey]);
+    // console.log(data.updates[0].entry);
+    if (data.updates[0].entry.value) {
+      const valueKey = data.updates[0].entry.value.value;
+      // console.log(data.updates[0].entry.value[valueKey]);
+      subscribeList[path](data.updates[0].entry.value[valueKey]);
+    } else {
+      subscribeList[path](undefined);
+    }
   });
   call.on("end", () => {
     // The server has finished sending

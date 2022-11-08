@@ -31,19 +31,14 @@ const kuksaServerAddress = process.env.KUKSA_SERVER + ":" + process.env.KUKSA_PO
 const kuksaClient = new protoDef.VAL(kuksaServerAddress, grpc.credentials.createInsecure());
 
 let counter = 33;
-k.setFieldValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", 23);
 setInterval(() => {
   counter++;
-  k.setFieldValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", counter);
-}, 10000);
+  k.setFieldValue(kuksaClient, "Vehicle.Driver.Identifier.Subject", counter.toString());
+}, 1000);
 
-// k.getCurrentValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", (result) => {
+// k.getCurrentValue(kuksaClient, "Vehicle.Driver.Identifier.Subject", (result) => {
 //   console.log("Get current steering angle:", result);
 // });
-
-k.subscribe(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", (data) => {
-  console.log("Notify: ", data);
-});
 
 // Create an express app.
 const app = express();
@@ -77,7 +72,16 @@ wss.broadcast = (data) => {
   });
 };
 
-// On an incomming message over Websocket (browser) we need to execute something on the device.
+k.subscribe(kuksaClient, "Vehicle.Driver.Identifier.Subject", (data) => {
+  // console.log("Vehicle.Driver.Identifier.Subject Notify: ", data);
+  const jsonObj = {
+    path: "Vehicle.Driver.Identifier.Subject",
+    value: data,
+  };
+  wss.broadcast(JSON.stringify(jsonObj));
+});
+
+// On an incoming message over Websocket (browser) we need to execute something on the device.
 wss.on("connection", (ws) => {
   ws.on("message", (message) => {
     try {
