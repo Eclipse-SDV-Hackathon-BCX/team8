@@ -36,7 +36,9 @@ let acting = false;
 
 let badUsers = [ "32" ];
 
-let delay = 750;
+let wiggle_time=10
+let wiggle_delay = 200;
+let welcome_degree = 30;
 
 
 let topic = {
@@ -63,35 +65,34 @@ let topic = {
 function flee() {
   acting = true
 
-  kuksa.setFieldValue(kuksaClient,topic.accelAct,-45)
+  kuksa.setFieldValue(kuksaClient,topic.accelAct,-welcome_degree)
   setTimeout( () => {
-    kuksa.setFieldValue(kuksaClient,topic.accelAct,+45)
+    kuksa.setFieldValue(kuksaClient,topic.accelAct,+welcome_degree)
     acting = false
-  }, delay*5 )
+  }, wiggle_delay*5 )
 
 }
 
 function enjoy() {
   acting = true
+  
+  kuksa.setFieldValue(kuksaClient,topic.steerAct,-welcome_degree)
 
-  kuksa.setFieldValue(kuksaClient,"Vehicle.Chassis.SteeringWheel.AngleAct",-45)
+  for (let index = 0; index < wiggle_time; index= index +2) {
+    setTimeout( () => {
+      kuksa.setFieldValue(kuksaClient,topic.steerAct,-welcome_degree)
+    }, wiggle_delay*index )
+    setTimeout( () => {
+      kuksa.setFieldValue(kuksaClient,topic.steerAct,+welcome_degree)
+    }, wiggle_delay*(index+1) )
+  }
 
+
+  // in the end reset
   setTimeout( () => {
-    kuksa.setFieldValue(kuksaClient,"Vehicle.Chassis.SteeringWheel.AngleAct",+45)
-  }, delay )
-
-  setTimeout( () => {
-    kuksa.setFieldValue(kuksaClient,"Vehicle.Chassis.SteeringWheel.AngleAct",-45)
-  }, delay*2)
-
-  setTimeout( () => {
-    kuksa.setFieldValue(kuksaClient,"Vehicle.Chassis.SteeringWheel.AngleAct",+45)
-  }, delay*3 )
-
-  setTimeout( () => {
-    kuksa.setFieldValue(kuksaClient,"Vehicle.Chassis.SteeringWheel.AngleAct",0)
+    kuksa.setFieldValue(kuksaClient,topic.steerAct,0)
     acting= false
-  }, delay*4 )
+  }, wiggle_delay*wiggle_time )
 
 }
 
@@ -127,8 +128,9 @@ kuksa.subscribe(kuksaClient, topic.accel , (data) => {
     let dataAct= data
     if (userType === "bad") {
       dataAct = Math.min([data,20])
+      console.log("Accelerator Limit: ", dataAct)
     }
-    kuksa.setFieldValue(kuksaClient,topic.accelAct,dataAct)
+    kuksa.setFieldValueType(kuksaClient,topic.accelAct,dataAct,"uint32")
   }
 });
 
@@ -137,7 +139,7 @@ kuksa.subscribe(kuksaClient, topic.accel , (data) => {
 kuksa.subscribe(kuksaClient, topic.gear, (data) => {
   if ( data != null && data != "" && !acting) {
     console.log("Transmission: ", data)
-    kuksa.setFieldValue(kuksaClient,topic.gearAct,data)
+    kuksa.setFieldValueType(kuksaClient,topic.gearAct,data,"uint32")
 
   }
 });

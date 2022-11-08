@@ -12,6 +12,24 @@ import signal
 import time
 import queue
 
+from jetracer.nvidia_racecar import NvidiaRacecar
+
+import time
+
+car = NvidiaRacecar()
+car.throttle = 0.0
+car.steering_offset = 0.0
+car.steering = 0.0
+
+def setThrottle(t):
+    car.throttle = t / 100.0
+    print("car.throttle", car.throttle)
+
+
+def setSteering(s):
+    car.steering = s / 45.0  
+
+
 DEFAULT_CLOUD_CONNECTOR_ADDRESS = "10.52.204.181"
 DEFAULT_CLOUD_CONNECTOR_PORT = "55555"
 
@@ -86,16 +104,19 @@ async def main(grpc_client):
 
     while True:
         resp = await grpc_client.get_data("Vehicle.Chassis.Accelerator.PedalPositionAct")
-        resp2 = await grpc_client.get_data("Vehicle.Chassis.SteeringWheel.Angle")
+        resp2 = await grpc_client.get_data("Vehicle.Chassis.SteeringWheel.AngleAct")
         resp3 = await grpc_client.get_data("Vehicle.Powertrain.Transmission.CurrentGear")
 
         if resp:
-            print("pedal ", resp.entries[0].value.uint32)
+            print("setThrottle", resp.entries[0].value.uint32)
+            setThrottle(resp.entries[0].value.uint32)
+            
         if resp2:
-            print("angle ", resp2.entries[0].value.int32)
-        if resp3:
-            print(resp3)
-        await asyncio.sleep(1)
+            print("setSteering", resp2.entries[0].value.int32)
+            setSteering(resp2.entries[0].value.int32)
+        #if resp3:
+        #    print("CurrentGear", resp3)
+        await asyncio.sleep(0.1)
 
 grpc_client = GrpcClient()
 loop = asyncio.new_event_loop()
