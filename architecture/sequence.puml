@@ -1,0 +1,73 @@
+@startuml
+
+
+box jetracer 
+  participant manager
+  participant drivetrain
+  participant presencemanager
+  participant gamepad
+  participant kuksa
+  participant hmi
+end box
+
+actor driver
+
+activate kuksa
+
+==  Driver Detection ==
+  [-> driver : get close to vehicle
+  driver --> presencemanager ++: detecting signal above threashold
+  presencemanager -> kuksa --: publish user iditification (bl-id ?) <Vehicle.Driver.Identifier.Subject>
+  kuksa -> manager ++: <Vehicle.Driver.Identifier.Subject>
+  alt driver=good guy
+    manager -> kuksa : <Vehicle.Driver.Identifier.Type=nice>
+    kuksa -> hmi : welcome happy
+    manager -> kuksa --: "be happy" <Vehicle.Chassis.SteeringWheel.AngleAct>
+    kuksa -> drivetrain : steering <Vehicle.Chassis.SteeringWheel.AngleAct>
+
+    driver --> gamepad ++: drive / steer
+    gamepad -> kuksa --: pub <Vehicle.Chassis.Accelerator.PedalPosition> \n <Vehicle.Chassis.Brake.PedalPosition> <Vehicle.Chassis.SteeringWheel.Angle>
+    kuksa -> manager++: pub throttle/steer
+    manager -> drivetrain --: pub <Vehicle.Chassis.Accelerator.PedalPositionAct> \n <Vehicle.Chassis.Brake.PedalPositionAct> <Vehicle.Chassis.SteeringWheel.AngleAct>
+
+
+  else driver=bad guy
+    manager -> kuksa : <Vehicle.Driver.Identifier.Type=bad>
+    kuksa -> hmi : be angry
+    manager -> kuksa--:  "flee" <Vehicle.Chassis.Accelerator.PedalPositionAct>
+    kuksa -> drivetrain : full throttle
+
+    driver --> gamepad ++: drive / steer
+    gamepad -> kuksa --: pub <Vehicle.Chassis.Accelerator.PedalPosition> \n <Vehicle.Chassis.Brake.PedalPosition> <Vehicle.Chassis.SteeringWheel.Angle>
+    kuksa -> manager ++: pub <Vehicle.Chassis.Accelerator.PedalPosition> 
+    manager -> manager: calculate max throttle/steer
+    manager -> drivetrain --: pub <Vehicle.Chassis.Accelerator.PedalPositionAct> \n <Vehicle.Chassis.Brake.PedalPositionAct> <Vehicle.Chassis.SteeringWheel.AngleAct>
+
+
+  end
+
+' == drive safe ==
+
+'   [-> driver : get close to vehicle
+'   driver --> presencemanager ++: detecting
+'   presencemanager -> kuksa --: publish strongest signal
+'   kuksa -> manager ++: strongest signal 
+'   manager -> manager : store user
+'   alt driver=good guy
+'     driver --> gamepad ++: drive / steer
+'     gamepad -> kuksa --: pub throttle/steer
+'     kuksa -> manager: pub throttle/steer
+'     manager -> drivetrain: throttle/steer
+
+'   else driver=bad guy
+'     driver --> gamepad ++: drive / steer
+'     gamepad -> kuksa --: pub throttle/steer
+'     kuksa -> manager: pub throttle/steer
+'     manager -> manager: calculate max throttle/steer
+'     manager -> drivetrain --: throttle/steer
+
+'   end
+
+
+
+@enduml
