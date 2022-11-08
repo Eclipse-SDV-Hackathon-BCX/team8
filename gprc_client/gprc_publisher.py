@@ -10,32 +10,16 @@ import json
 import asyncio
 import signal
 import time
-import queue
-
-from jetracer.nvidia_racecar import NvidiaRacecar
-
-import time
-
-car = NvidiaRacecar()
-car.throttle = 0.0
-car.steering_offset = 0.0
-car.steering = 0.0
-
-def setThrottle(t):
-    car.throttle = t / -100.0 # change rotation direction because of wrong wireing
-    print("car.throttle", car.throttle)
-
-
-def setSteering(s):
-    car.steering = s / 45.0  
 
 
 DEFAULT_CLOUD_CONNECTOR_ADDRESS = "10.52.204.181"
 DEFAULT_CLOUD_CONNECTOR_PORT = "55555"
 
+
 class GrpcClient:
     def __init__(self):
         """Initiate a connection
+
         Args:
             id (int): thread id
             name (str): thread name
@@ -64,8 +48,6 @@ class GrpcClient:
         self.command_stream = None
 
         self.subscriptions = list()
-
-        self.queue = queue.Queue()
     
     async def set_data(self, datapoint_path, datatype, data):
         now = time.time()
@@ -93,36 +75,39 @@ class GrpcClient:
         responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, view=View.VIEW_ALL)]))
         
         for response in responses:
-            yield response
+            print(response)
+            await asyncio.sleep(1)
 
 
-async def main(grpc_client):
-    await grpc_client.subscribe("Vehicle.Chassis.Accelerator.PedalPosition")
+# async def main(grpc_client):
+#     await grpc_client.subscribe("Vehicle.Chassis.Accelerator.PedalPosition")
 
-    await grpc_client.set_data("Vehicle.Chassis.SteeringWheel.AngleAct", datatype="int32" , data=11)
+    # while True:
+    #     resp = await grpc_client.get_data("Vehicle.Chassis.Accelerator.PedalPosition")
+    #     resp2 = await grpc_client.get_data("Vehicle.Chassis.SteeringWheel.Angle")
+    #     resp3 = await grpc_client.get_data("Vehicle.Powertrain.Transmission.CurrentGear")
 
-    while True:
-        resp = await grpc_client.get_data("Vehicle.Chassis.Accelerator.PedalPositionAct")
-        resp2 = await grpc_client.get_data("Vehicle.Chassis.SteeringWheel.AngleAct")
-        resp3 = await grpc_client.get_data("Vehicle.Powertrain.Transmission.CurrentGear")
+    #     if resp:
+    #         print("pedal ", resp.entries[0].value.uint32)
+    #     if resp2:
+    #         print("angle ", resp2.entries[0].value.int32)
+    #     if resp3:
+    #         print(resp3)
+    #     await asyncio.sleep(1)
 
-        if resp:
-            print("setThrottle", resp.entries[0].value.uint32)
-            setThrottle(resp.entries[0].value.uint32)
-            
-        if resp2:
-            print("setSteering", resp2.entries[0].value.int32)
-            setSteering(resp2.entries[0].value.int32)
-        #if resp3:
-        #    print("CurrentGear", resp3)
-        await asyncio.sleep(0.1)
+async def publish_gear(grpc_client):
+    
+    
+    resp = await grpc_client.set_data("Vehicle.Chassis.SteeringWheel.AngleAct", 11)
+
+    print(resp)
+
 
 grpc_client = GrpcClient()
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 try:
-    loop.create_task(main(grpc_client))
-    loop.run_forever()
+    loop.run_until_complete(publish_gear(grpc_client))
 finally:
     loop.run_until_complete(loop.shutdown_asyncgens())
     loop.close()
