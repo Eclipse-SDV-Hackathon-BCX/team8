@@ -26,9 +26,9 @@ activate kuksa
     kuksa -> drivetrain : steering <Vehicle.Chassis.SteeringWheel.AngleAct>
 
     driver --> gamepad ++: drive / steer
-    gamepad -> kuksa --: pub <Vehicle.Chassis.Accelerator.PedalPosition> \n <Vehicle.Chassis.Brake.PedalPosition> <Vehicle.Chassis.SteeringWheel.Angle>
+    gamepad -> kuksa --: pub <Vehicle.Chassis.Accelerator.PedalPosition> \n <Vehicle.Powertrain.Transmission.CurrentGear> <Vehicle.Chassis.SteeringWheel.Angle>
     kuksa -> manager++: pub throttle/steer
-    manager -> drivetrain --: pub <Vehicle.Chassis.Accelerator.PedalPositionAct> \n <Vehicle.Chassis.Brake.PedalPositionAct> <Vehicle.Chassis.SteeringWheel.AngleAct>
+    manager -> drivetrain --: pub <Vehicle.Chassis.Accelerator.PedalPositionAct> \n <Vehicle.Powertrain.Transmission.SelectedGear> <Vehicle.Chassis.SteeringWheel.AngleAct>
 
 
   else driver=bad guy
@@ -38,10 +38,10 @@ activate kuksa
     kuksa -> drivetrain : full throttle
 
     driver --> gamepad ++: drive / steer
-    gamepad -> kuksa --: pub <Vehicle.Chassis.Accelerator.PedalPosition> \n <Vehicle.Chassis.Brake.PedalPosition> <Vehicle.Chassis.SteeringWheel.Angle>
+    gamepad -> kuksa --: pub <Vehicle.Chassis.Accelerator.PedalPosition> \n <Vehicle.Powertrain.Transmission.CurrentGear> <Vehicle.Chassis.SteeringWheel.Angle>
     kuksa -> manager ++: pub <Vehicle.Chassis.Accelerator.PedalPosition> 
     manager -> manager: calculate max throttle/steer
-    manager -> drivetrain --: pub <Vehicle.Chassis.Accelerator.PedalPositionAct> \n <Vehicle.Chassis.Brake.PedalPositionAct> <Vehicle.Chassis.SteeringWheel.AngleAct>
+    manager -> drivetrain --: pub <Vehicle.Chassis.Accelerator.PedalPositionAct> \n <Vehicle.Powertrain.Transmission.SelectedGear> <Vehicle.Chassis.SteeringWheel.AngleAct>
 
 
   end
