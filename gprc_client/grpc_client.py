@@ -6,6 +6,7 @@ from my_vehicle_model.proto.val_pb2 import EntryUpdate, SetRequest, GetRequest, 
 from my_vehicle_model.proto.val_pb2_grpc import VALStub
 
 import grpc
+import json
 import asyncio
 import signal
 import time
@@ -73,16 +74,20 @@ class GrpcClient:
 async def main(grpc_client):
     grpc_client.subscribe("Vehicle.Chassis.Accelerator.PedalPosition")
 
+    
+
     while True:
         resp = await grpc_client.get_data("Vehicle.Chassis.Accelerator.PedalPosition")
-        # resp2 = grpc_client.get_data("Vehicle.Chassis.SteeringWheel.Angle")
-        # resp3 = grpc_client.get_data("Vehicle.Powertrain.Transmission.CurrentGear")
+        resp2 = await grpc_client.get_data("Vehicle.Chassis.SteeringWheel.Angle")
+        resp3 = await grpc_client.get_data("Vehicle.Powertrain.Transmission.CurrentGear")
 
         if resp:
-            print(resp)
-            await asyncio.sleep(1)
-        # print(resp2)
-        # print(resp3)
+            print(resp.entries[0].value.uint32)
+        if resp2:
+            print(resp2.entries[0].value.int32)
+        # if resp3:
+        #     print(resp3)
+        await asyncio.sleep(1)
 
 grpc_client = GrpcClient()
 loop = asyncio.new_event_loop()
