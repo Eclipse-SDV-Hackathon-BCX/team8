@@ -12,16 +12,16 @@ package JetRacer {
   component presencemanager <<bluetooth/sensor>> as pm 
   component  gamepad <<sensor>>
   
-  interface can
+  ' interface can
   component kuksa <<kuksa>> #BCW
   
 
   
 
 
-  pm <.up.> can
-  drivetrain <.up.> can
-  kuksa <.down.> can
+  pm <-up-> kuksa
+  drivetrain <-up-> kuksa
+  ' kuksa <.down.> can
 
   manager <-down-> kuksa
   kuksa <-left-> gamepad
