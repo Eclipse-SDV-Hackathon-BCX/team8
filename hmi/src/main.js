@@ -8,27 +8,45 @@ const express = require("express");
 const http = require("http");
 const path = require("path");
 const WebSocket = require("ws");
-require("dotenv").config();
 const createError = require("http-errors");
+const grpc = require("@grpc/grpc-js");
+const protoLoader = require("@grpc/proto-loader");
+require("dotenv").config();
 
-// var PROTO_PATH = __dirname + "/../../protos/helloworld.proto";
+const k = require("./components/kuksa-sdk.js");
 
-// var parseArgs = require("minimist");
-// var grpc = require("@grpc/grpc-js");
-// var protoLoader = require("@grpc/proto-loader");
-// var packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-//   keepCase: true,
-//   longs: String,
-//   enums: String,
-//   defaults: true,
-//   oneofs: true,
+const PROTO_PATH = "./" + process.env.PROTO_FILES;
+// console.log(PROTO_PATH);
+
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+const protoDef = grpc.loadPackageDefinition(packageDefinition).kuksa.val.v1;
+const kuksaServerAddress = process.env.KUKSA_SERVER + ":" + process.env.KUKSA_PORT;
+
+const kuksaClient = new protoDef.VAL(kuksaServerAddress, grpc.credentials.createInsecure());
+
+let counter = 33;
+k.setFieldValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", 23);
+setInterval(() => {
+  counter++;
+  k.setFieldValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", counter);
+}, 10000);
+
+// k.getCurrentValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", (result) => {
+//   console.log("Get current steering angle:", result);
 // });
-// var hello_proto = grpc.loadPackageDefinition(packageDefinition).helloworld;
+
+k.subscribe(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", (data) => {
+  console.log("Notify: ", data);
+});
 
 // Create an express app.
 const app = express();
-
-app.use(express.static(path.join(__dirname, "public")));
 
 /* GET home page. */
 app.use(express.static("public"));
