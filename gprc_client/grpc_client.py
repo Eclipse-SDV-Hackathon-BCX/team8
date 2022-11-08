@@ -1,5 +1,5 @@
 from __future__ import print_function
-from my_vehicle_model.proto.types_pb2 import Datapoint, DataEntry, View
+from my_vehicle_model.proto.types_pb2 import Datapoint, DataEntry, View, Field
 from google.protobuf.timestamp_pb2 import Timestamp
 from my_vehicle_model.proto.val_pb2 import EntryUpdate, SetRequest, GetRequest, EntryRequest, SubscribeEntry, SubscribeRequest
 
@@ -36,7 +36,6 @@ DEFAULT_CLOUD_CONNECTOR_PORT = "55555"
 class GrpcClient:
     def __init__(self):
         """Initiate a connection
-
         Args:
             id (int): thread id
             name (str): thread name
