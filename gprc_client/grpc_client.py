@@ -1,3 +1,4 @@
+from __future__ import print_function
 from my_vehicle_model.proto.types_pb2 import Datapoint, DataEntry, View
 from google.protobuf.timestamp_pb2 import Timestamp
 from my_vehicle_model.proto.val_pb2 import EntryUpdate, SetRequest, GetRequest, EntryRequest, SubscribeEntry, SubscribeRequest
@@ -47,7 +48,7 @@ class GrpcClient:
 
         self.subscriptions = list()
     
-    def set_data(self, datapoint_path, data):
+    async def set_data(self, datapoint_path, data):
         now = time.time()
         seconds = int(now)
         nanos = int((now - seconds) * 10**9)
@@ -56,7 +57,7 @@ class GrpcClient:
         return response
 
     async def get_data(self, datapoint_path):
-        response = await self._stub.Get(
+        response = self._stub.Get(
             GetRequest(entries=[EntryRequest(path=datapoint_path, view=View.VIEW_CURRENT_VALUE)]),
             # metadata=self.metadata,
         )
@@ -66,18 +67,29 @@ class GrpcClient:
         responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, view=View.VIEW_ALL)]))
         
         for response in responses:
-            print(response)
+            yield response
 
 
-async def main():
-    grpc_client = GrpcClient()
+async def main(grpc_client):
     grpc_client.subscribe("Vehicle.Chassis.Accelerator.PedalPosition")
 
-    set_resp = grpc_client.set_data("Vehicle.Chassis.Accelerator.PedalPosition", 42)
+    while True:
+        resp = await grpc_client.get_data("Vehicle.Chassis.Accelerator.PedalPosition")
+        # resp2 = grpc_client.get_data("Vehicle.Chassis.SteeringWheel.Angle")
+        # resp3 = grpc_client.get_data("Vehicle.Powertrain.Transmission.CurrentGear")
 
+        if resp:
+            print(resp)
+            await asyncio.sleep(1)
+        # print(resp2)
+        # print(resp3)
+
+grpc_client = GrpcClient()
 loop = asyncio.new_event_loop()
-# asyncio.set_event_loop(loop)
-# LOOP = asyncio.get_event_loop()
-# LOOP.add_signal_handler(signal.SIGTERM, LOOP.stop)
-loop.run_until_complete(main())
-loop.close()
+asyncio.set_event_loop(loop)
+try:
+    loop.create_task(main(grpc_client))
+    loop.run_forever()
+finally:
+    loop.run_until_complete(loop.shutdown_asyncgens())
+    loop.close()
