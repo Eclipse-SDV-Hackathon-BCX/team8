@@ -13,18 +13,14 @@ const subscribeList = {};
 //   path: callback
 // }
 
-function setFieldValue(client, path, value) {
+function setFieldValueType(client, path, value, type) {
   const datapoint = {
     timestamp: {
       seconds: unixTimestampSeconds(),
       nanos: 0,
     },
   };
-  if (typeof value == "string") {
-    datapoint.string = value;
-  } else if (typeof value == "number") {
-    datapoint.int32 = value;
-  }
+  datapoint[type] = value;
 
   // console.log("Datapoint:", datapoint);
   const entryUpdate = {
@@ -48,6 +44,14 @@ function setFieldValue(client, path, value) {
       console.log("Set response errors:", response.errors);
     }
   });
+}
+
+function setFieldValue(client, path, value) {
+  if (typeof value == "string") {
+    setFieldValueType(client, path, value, "string");
+  } else if (typeof value == "number") {
+    setFieldValueType(client, path, value, "int32");
+  }
 }
 
 async function getCurrentValue(client, path, cb) {
@@ -110,6 +114,7 @@ async function subscribe(client, path, cb) {
 
 module.exports = {
   setFieldValue,
+  setFieldValueType,
   getCurrentValue,
   subscribe,
 };
