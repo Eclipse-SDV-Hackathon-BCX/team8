@@ -16,16 +16,16 @@ class PedalPositionService(Service):
         super().__init__()
         self._stub = VALStub(self.channel)
 
-    async def set_data(self, data):
+    def set_data(self, data):
         now = time.time()
         seconds = int(now)
         nanos = int((now - seconds) * 10**9)
         timestamp = Timestamp(seconds=seconds, nanos=nanos)
-        response = await self._stub.Set(SetRequest(updates=[EntryUpdate(entry=DataEntry(path="Vehicle.Chassis.Accelerator.PedalPosition", value=Datapoint(timestamp=timestamp, uint32=data)))]))
+        response = self._stub.Set(SetRequest(updates=[EntryUpdate(entry=DataEntry(path="Vehicle.Chassis.Accelerator.PedalPosition", value=Datapoint(timestamp=timestamp, uint32=data)))]))
         return response
 
-    async def get_data(self):
-        response = await self._stub.Get(
+    def get_data(self):
+        response = self._stub.Get(
             GetRequest(entries=[EntryRequest(path="Vehicle.Chassis.Accelerator.PedalPosition", view=View.VIEW_CURRENT_VALUE)]),
             metadata=self.metadata,
         )

@@ -12,22 +12,6 @@ import time
 import queue
 import os
 
-from jetracer.nvidia_racecar import NvidiaRacecar
-
-
-car = NvidiaRacecar()
-car.throttle = 0.0
-car.steering_offset = 0.0
-car.steering = 0.0
-
-def setThrottle(t):
-    car.throttle = t / -100.0 # change rotation direction because of wrong wireing
-    print("car.throttle", car.throttle)
-
-
-def setSteering(s):
-    car.steering = s / 45.0  
-
 
 KUKSA_DATA_BROKER_ADDRESS = os.environ['KUKSA_DATA_BROKER_ADDRESS']
 KUKSA_DATA_BROKER_PORT = os.environ['KUKSA_DATA_BROKER_PORT']
@@ -66,7 +50,7 @@ class GrpcClient:
 
         self.queue = queue.Queue()
     
-    async def set_data(self, datapoint_path, datatype, data):
+    def set_data(self, datapoint_path, datatype, data):
         now = time.time()
         seconds = int(now)
         nanos = int((now - seconds) * 10**9)
@@ -74,6 +58,8 @@ class GrpcClient:
 
         if datatype == "int32":
             datapoint = Datapoint(timestamp=timestamp, int32=data)
+        elif datatype == "string":
+            datapoint = Datapoint(timestamp=timestamp, string=data)
         else:
             datapoint = Datapoint(timestamp=timestamp, int32=data)
         data_entry = DataEntry(path=datapoint_path, value=datapoint)
@@ -81,14 +67,14 @@ class GrpcClient:
         response = self._stub.Set(SetRequest(updates=updates))
         return response
 
-    async def get_data(self, datapoint_path):
+    def get_data(self, datapoint_path):
         response = self._stub.Get(
             GetRequest(entries=[EntryRequest(path=datapoint_path, view=View.VIEW_CURRENT_VALUE)]),
             # metadata=self.metadata,
         )
         return response
     
-    async def subscribe(self, path, sub_callback):
+    def subscribe(self, path, sub_callback):
         responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, fields=[Field.FIELD_VALUE])]))
         
-        await sub_callback(responses)
+        sub_callback(responses)
