@@ -12,21 +12,21 @@ import time
 import queue
 import os
 
-from jetracer.nvidia_racecar import NvidiaRacecar
+# from jetracer.nvidia_racecar import NvidiaRacecar
 
 
-car = NvidiaRacecar()
-car.throttle = 0.0
-car.steering_offset = 0.0
-car.steering = 0.0
+# car = NvidiaRacecar()
+# car.throttle = 0.0
+# car.steering_offset = 0.0
+# car.steering = 0.0
 
-def setThrottle(t):
-    car.throttle = t / -100.0 # change rotation direction because of wrong wireing
-    print("car.throttle", car.throttle)
+# def setThrottle(t):
+#     car.throttle = t / -100.0 # change rotation direction because of wrong wireing
+#     print("car.throttle", car.throttle)
 
 
-def setSteering(s):
-    car.steering = s / 45.0  
+# def setSteering(s):
+#     car.steering = s / 45.0  
 
 
 KUKSA_DATA_BROKER_ADDRESS = os.environ['KUKSA_DATA_BROKER_ADDRESS']
@@ -88,8 +88,7 @@ class GrpcClient:
         )
         return response
     
-    async def subscribe(self, path):
-        responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, view=View.VIEW_ALL)]))
+    async def subscribe(self, path, sub_callback):
+        responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, fields=[Field.FIELD_VALUE])]))
         
-        for response in responses:
-            print(response)
+        await sub_callback(responses)
