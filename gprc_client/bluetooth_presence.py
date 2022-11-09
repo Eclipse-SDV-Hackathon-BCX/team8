@@ -14,6 +14,7 @@ import asyncio
 import signal
 import time
 import queue
+import os
 
 from beacontools import BeaconScanner, EddystoneTLMFrame, EddystoneFilter, EddystoneUIDFrame
 
@@ -25,8 +26,8 @@ BEACON_BAD_NAMESPACE  = "245067ce9125c778c24e"
 
 state = "good"
 
-DEFAULT_CLOUD_CONNECTOR_ADDRESS = "10.52.204.181"
-DEFAULT_CLOUD_CONNECTOR_PORT = "55555"
+DEFAULT_CLOUD_CONNECTOR_ADDRESS = os.environ['KUKSA_DATA_BROKER_ADDRESS']
+DEFAULT_CLOUD_CONNECTOR_PORT = os.environ['KUKSA_DATA_BROKER_PORT']
 
 
 class GrpcClient:
