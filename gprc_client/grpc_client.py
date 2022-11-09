@@ -1,4 +1,3 @@
-from __future__ import print_function
 from my_vehicle_model.proto.types_pb2 import Datapoint, DataEntry, View, Field
 from google.protobuf.timestamp_pb2 import Timestamp
 from my_vehicle_model.proto.val_pb2 import EntryUpdate, SetRequest, GetRequest, EntryRequest, SubscribeEntry, SubscribeRequest
@@ -11,10 +10,10 @@ import asyncio
 import signal
 import time
 import queue
+import os
 
 from jetracer.nvidia_racecar import NvidiaRacecar
 
-import time
 
 car = NvidiaRacecar()
 car.throttle = 0.0
@@ -30,8 +29,8 @@ def setSteering(s):
     car.steering = s / 45.0  
 
 
-DEFAULT_CLOUD_CONNECTOR_ADDRESS = "10.52.204.181"
-DEFAULT_CLOUD_CONNECTOR_PORT = "55555"
+KUKSA_DATA_BROKER_ADDRESS = os.environ['KUKSA_DATA_BROKER_ADDRESS']
+KUKSA_DATA_BROKER_PORT = os.environ['KUKSA_DATA_BROKER_PORT']
 
 class GrpcClient:
     def __init__(self):
@@ -56,7 +55,7 @@ class GrpcClient:
         ]
 
         channel = grpc.insecure_channel(
-            DEFAULT_CLOUD_CONNECTOR_ADDRESS + ":" + DEFAULT_CLOUD_CONNECTOR_PORT,
+            KUKSA_DATA_BROKER_ADDRESS + ":" + KUKSA_DATA_BROKER_PORT,
             options=channel_options,
         )
         self._stub = VALStub(channel)
@@ -93,36 +92,4 @@ class GrpcClient:
         responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, view=View.VIEW_ALL)]))
         
         for response in responses:
-            yield response
-
-
-async def main(grpc_client):
-    await grpc_client.subscribe("Vehicle.Chassis.Accelerator.PedalPosition")
-
-    await grpc_client.set_data("Vehicle.Chassis.SteeringWheel.AngleAct", datatype="int32" , data=11)
-
-    while True:
-        resp = await grpc_client.get_data("Vehicle.Chassis.Accelerator.PedalPositionAct")
-        resp2 = await grpc_client.get_data("Vehicle.Chassis.SteeringWheel.AngleAct")
-        resp3 = await grpc_client.get_data("Vehicle.Powertrain.Transmission.CurrentGear")
-
-        if resp:
-            print("setThrottle", resp.entries[0].value.uint32)
-            setThrottle(resp.entries[0].value.uint32)
-            
-        if resp2:
-            print("setSteering", resp2.entries[0].value.int32)
-            setSteering(resp2.entries[0].value.int32)
-        #if resp3:
-        #    print("CurrentGear", resp3)
-        await asyncio.sleep(0.1)
-
-grpc_client = GrpcClient()
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-try:
-    loop.create_task(main(grpc_client))
-    loop.run_forever()
-finally:
-    loop.run_until_complete(loop.shutdown_asyncgens())
-    loop.close()
+            print(response)
