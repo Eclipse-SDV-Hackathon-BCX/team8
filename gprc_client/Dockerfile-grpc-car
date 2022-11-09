@@ -14,7 +14,6 @@ RUN pip3 install pipenv
 COPY . /tmp/src
 RUN cd /tmp/src && pipenv install 
 RUN cd /tmp/src && pipenv install traitlets Jetson.GPIO  Adafruit-Blinka adafruit-circuitpython-lis3dh
-RUN cd /tmp/src && git clone https://github.com/NVIDIA-AI-IOT/jetracer && \
-	cd /tmp/src/jetracer && pipenv run python setup.py install
+RUN cd /tmp/src/jetracer && pipenv run python setup.py install
 
-CMD ["pipenv", "run", "/tmp/src/vehicle_control.py"]
+CMD ["pipenv", "run", "python3", "/tmp/src/vehicle_control.py"]
