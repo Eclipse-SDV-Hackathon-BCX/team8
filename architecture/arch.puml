@@ -1,45 +1,66 @@
 @startuml
 
+' !include https://gitlab.iavgroup.local/jweber/iav-design/-/raw/main/iav_style.puml
 
 !define BCW lightgreen
 
+actor user
+
+interface "Gamepad" as gp
 
 package JetRacer {
 
-  component manager <<velocitas>> #BCW
+  component karen <<nodejs/Manager>> 
   
   component drivetrain <<actor>>
-  component presencemanager <<bluetooth/sensor>> as pm 
-  component  gamepad <<sensor>>
+  component presencemanager <<sensor>> as pm 
+  component  gamepad <<sensor/velocitas>> #BCW
   
   ' interface can
-  component kuksa <<kuksa>> #BCW
+  component kuksa <<kuksa/VSS>> #BCW
+  
+  interface i2c
+  interface bluetooth
   
 
-  
+  node "motor/steering"  as ms 
 
 
   pm <-up-> kuksa
-  drivetrain <-up-> kuksa
+  
   ' kuksa <.down.> can
 
-  manager <-down-> kuksa
-  kuksa <-left-> gamepad
+  karen <-down-> kuksa
+  
+  kuksa <-down-> gamepad
+  gamepad <-down-> gp
+  gp <..> user
+  
 
 
+  pm <-down-> bluetooth
+  bluetooth <..> user
+
+
+
+  drivetrain <-up-> kuksa
+  drivetrain <-down-> i2c
+  i2c <-> ms
+  
 }
 
 
 
 package screen {
-  component hmi
+  component hmi <<NodeJS/HTML>>
 }
 
 
-package  Raspberry{ 
+
+' package  Raspberry{ 
 
 
-}
+' }
 
 kuksa <-> hmi
 
