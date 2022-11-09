@@ -21,7 +21,7 @@ car.steering_offset = 0.0
 car.steering = 0.0
 
 def setThrottle(t):
-    car.throttle = t / 100.0
+    car.throttle = t / -100.0 # change rotation direction because of wrong wireing
     print("car.throttle", car.throttle)
 
 
