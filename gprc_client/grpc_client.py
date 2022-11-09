@@ -60,6 +60,8 @@ class GrpcClient:
             datapoint = Datapoint(timestamp=timestamp, int32=data)
         elif datatype == "string":
             datapoint = Datapoint(timestamp=timestamp, string=data)
+        elif datatype == "uint32":
+            datapoint = Datapoint(timestamp=timestamp, uint32=data)
         else:
             datapoint = Datapoint(timestamp=timestamp, int32=data)
         data_entry = DataEntry(path=datapoint_path, value=datapoint)
@@ -74,7 +76,10 @@ class GrpcClient:
         )
         return response
     
-    def subscribe(self, path, sub_callback):
-        responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, fields=[Field.FIELD_VALUE])]))
+    def subscribe(self, paths, sub_callback):
+        subscribed_topics = []
+        for entry in paths:
+            subscribed_topics.append(SubscribeEntry(path=entry, fields=[Field.FIELD_VALUE]))
+        responses = self._stub.Subscribe(SubscribeRequest(entries=subscribed_topics))
         
         sub_callback(responses)
