@@ -27,15 +27,15 @@ def sub_callback(stream):
         elif item.updates[0].entry.path == "Vehicle.Chassis.SteeringWheel.AngleAct":
             print("Vehicle.Chassis.SteeringWheel.AngleAct", item.updates[0].entry.value.int32)
             setSteering( item.updates[0].entry.value.int32)
-        elif item.updates[0].entry.path == "Vehicle.Powertrain.Transmission.CurrentGear":
-            print("Vehicle.Powertrain.Transmission.CurrentGear", item.updates[0].entry.value.int32)
+        elif item.updates[0].entry.path == "Vehicle.Powertrain.Transmission.SelectedGear":
+            print("Vehicle.Powertrain.Transmission.SelectedGear", item.updates[0].entry.value.int32)
             if item.updates[0].entry.value.int32 < 0:
                 gear = -1.0
             else:
                 gear = 1.0;
 
 def main(grpc_client):
-    grpc_client.subscribe(["Vehicle.Chassis.Accelerator.PedalPositionAct","Vehicle.Chassis.SteeringWheel.AngleAct","Vehicle.Powertrain.Transmission.CurrentGear"],  sub_callback)
+    grpc_client.subscribe(["Vehicle.Chassis.Accelerator.PedalPositionAct","Vehicle.Chassis.SteeringWheel.AngleAct","Vehicle.Powertrain.Transmission.SelectedGear"],  sub_callback)
 
 
 
