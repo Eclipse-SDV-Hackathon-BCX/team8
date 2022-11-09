@@ -1,0 +1,13 @@
+FROM python:3.8-slim-buster
+
+RUN apt-get update && apt-get install -y git
+
+WORKDIR /tmp/src
+
+RUN pip3 install pipenv
+
+RUN  apt-get install -y bluetooth libbluetooth-dev gcc
+
+RUN pip3 install grpcio future asyncio protobuf pybluez==0.23 beacontools
+COPY . /tmp/src
+CMD ["python3", "bluetooth_presence.py"]
