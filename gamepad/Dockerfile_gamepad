@@ -1,0 +1,14 @@
+FROM python:3.10-slim-buster
+
+RUN apt-get update && apt-get install -y git python-dev python-pip gcc
+# RUN apt-get install linux-headers-$(uname -r)
+
+WORKDIR /tmp/src
+
+COPY gamepad /tmp/src/gamepad
+COPY gprc_client /tmp/src/gamepad/gprc_client
+RUN mv /tmp/src/gamepad/gprc_client/my_vehicle_model/ /tmp/src/gamepad/
+RUN cd /tmp/src && pip install -r gamepad/requirements.txt
+
+CMD [ "python", "gamepad/gamepad.py" ]
+# ENTRYPOINT [ "/bin/bash" ]
