@@ -30,13 +30,15 @@ const kuksaClient = new protoDef.VAL(kuksaServerAddress, grpc.credentials.create
 
 
 
-let activeUser = "";
+let activeUser = "good";
 let userType = "good";
+let limitBad = 40;
+
 let acting = false;
 
 let badUsers = [ "bad" ];
 
-let wiggle_time=6
+let wiggle_time=10
 let wiggle_delay = 200;
 let welcome_degree = 30;
 
@@ -66,15 +68,15 @@ function flee() {
   acting = true
 
   kuksa.setFieldValue(kuksaClient,topic.steerAct,45)
-  kuksa.setFieldValue(kuksaClient,topic.accelAct, 20)
-  kuksa.setFieldValue(kuksaClient,topic.gearAct, 1)
+  kuksa.setFieldValueType(kuksaClient,topic.accelAct,100,"uint32")
+  kuksa.setFieldValueType(kuksaClient,topic.gearAct, -1,"uint32")
 
   
   setTimeout( () => {
-    kuksa.setFieldValue(kuksaClient,topic.accelAct,0 )
+    kuksa.setFieldValueType(kuksaClient,topic.accelAct,0,"uint32")
     kuksa.setFieldValue(kuksaClient,topic.steerAct,0)
     acting = false
-  }, wiggle_delay*5 )
+  }, wiggle_delay*20 )
 
 }
 
@@ -108,6 +110,7 @@ kuksa.subscribe(kuksaClient, "Vehicle.Driver.Identifier.Subject", (data) => {
   if ( data != undefined && data !== "" && data != activeUser && !acting) {
     console.log("New User: ", data)
     // if user is a bad user flee, otherwise welcome him/her
+    activeUser = data
     if ( badUsers.includes(data)  )  {
       userType = "bad"
       flee()
@@ -132,7 +135,7 @@ kuksa.subscribe(kuksaClient, topic.accel , (data) => {
     console.log("Accelerator: ", data)
     let dataAct= data
     if (userType === "bad") {
-      dataAct = Math.min([data,20])
+      dataAct = Math.min(data,limitBad)
       console.log("Accelerator Limit: ", dataAct)
     }
     kuksa.setFieldValueType(kuksaClient,topic.accelAct,dataAct,"uint32")
