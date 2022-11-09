@@ -1,0 +1,10 @@
+Vehicle Control Container
+docker build -t vehicle_control:latest -f Dockerfile-grpc-car .
+docker run -it --rm --privileged  --device /dev/i2c-0 --device /dev/i2c-1 --device /dev/i2c-8  --device /dev/i2c-6 -e KUKSA_DATA_BROKER_ADDRESS=10.52.204.181 -eKUKSA_DATA_BROKER_PORT=55555  vehicle_control:latest
+
+
+
+
+Bluetooth presence
+docker build -t bluetooth_presence -f Dockerfile-grpc-bluetooth-presence .
+docker run --net=host --privileged -it --rm bluetooth_presence:latest

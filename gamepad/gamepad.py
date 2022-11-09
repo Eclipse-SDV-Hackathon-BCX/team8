@@ -29,7 +29,7 @@ for event in gamepad.read_loop():
         steering_raw = event.value
         # [-45.0,45.0]
         steering = float(steering_raw - 127) / 127 * 45.0
-        grpc_client.set_data("Vehicle.Chassis.SteeringWheel.Angle", datatype="int32" , data=steering)
+        grpc_client.set_data("Vehicle.Chassis.SteeringWheel.Angle", datatype="int32" , data=int(steering))
         print("steering", steering)
         
       # code 1: right thumb stick   
@@ -39,5 +39,11 @@ for event in gamepad.read_loop():
         throttle_raw = event.value
         throttle = float(throttle_raw - 127) / 127 * - 100.0
         # [ -100 .. 0 .. 100]
-        grpc_client.set_data("Vehicle.Chassis.Accelerator.PedalPosition ", datatype="int32" , data=throttle)
+        grpc_client.set_data("Vehicle.Chassis.Accelerator.PedalPosition ", datatype="uint32", data=int(throttle))
+        if throttle == 0:
+            grpc_client.set_data("Vehicle.Powertrain.Transmission.CurrentGear", datatype="int32" , data=0)
+        elif throttle > 0:
+            grpc_client.set_data("Vehicle.Powertrain.Transmission.CurrentGear", datatype="int32" , data=1)
+        elif throttle < 0:
+            grpc_client.set_data("Vehicle.Powertrain.Transmission.CurrentGear", datatype="int32" , data=-1)
         print("throttle", throttle)

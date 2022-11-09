@@ -7,8 +7,8 @@ async def sub_callback(stream):
 
 async def main(grpc_client):
     # asyncio.gather(grpc_client.subscribe("Vehicle.Chassis.Accelerator.PedalPosition", sub_callback))
-    # await grpc_client.subscribe("Vehicle.Chassis.Accelerator.PedalPosition", sub_callback)
-    await grpc_client.set_data("Vehicle.Chassis.SteeringWheel.AngleAct", datatype="int32" , data=11)
+    await grpc_client.subscribe("Vehicle.Chassis.SteeringWheel.AngleAct", sub_callback)
+    # await grpc_client.set_data("Vehicle.Chassis.SteeringWheel.AngleAct", datatype="int32" , data=11)
 
     # while True:
     #     resp = await grpc_client.get_data("Vehicle.Chassis.Accelerator.PedalPositionAct")
