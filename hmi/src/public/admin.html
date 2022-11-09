@@ -11,68 +11,67 @@
       integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="style.css" />
 
     <title>BCX HMI</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="#">Navbar</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarsExampleDefault"
-        aria-controls="navbarsExampleDefault"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h1>Vehicle Adaptation</h1>
+        </div>
+      </div>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#">Disabled</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="http://example.com"
-              id="dropdown01"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-              >Dropdown</a
-            >
-            <div class="dropdown-menu" aria-labelledby="dropdown01">
-              <a class="dropdown-item" href="#">Action</a>
-              <a class="dropdown-item" href="#">Another action</a>
-              <a class="dropdown-item" href="#">Something else here</a>
+      <div class="row">
+        <div class="col">
+          <h2>Current driver: <span id="Vehicle.Driver.Identifier.Subject">Searching...</span></h2>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col"><h2>Sensors</h2></div>
+        <div class="col"><h2>Actuators</h2></div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <p>Steering wheel angle</p>
+          <div class="gauge1">
+            <div class="gauge1__body">
+              <div class="gauge1__fill"></div>
+              <div class="gauge1__cover"></div>
             </div>
-          </li>
-        </ul>
-        <form class="form-inline my-2 my-lg-0">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" />
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
+          </div>
+        </div>
+        <div class="col">
+          <p>Steering wheel angle</p>
+          <div class="gauge2">
+            <div class="gauge2__body">
+              <div class="gauge2__fill"></div>
+              <div class="gauge2__cover"></div>
+            </div>
+          </div>
+        </div>
       </div>
-    </nav>
 
-    <main role="main" class="container">
-      <div class="starter-template">
-        <h1>Vehicle Driver Identifier</h1>
-        <p class="lead">Driver ID: <span id="Vehicle.Driver.Identifier.Subject">Searching...</span></p>
-        <p>Steering wheel angle: <span id="Vehicle.Chassis.SteeringWheel.Angle">?</span> degrees</p>
-        <p>Gas pedal position: <span id="Vehicle.Chassis.Accelerator.PedalPosition">?</span> %</p>
+      <div class="row">
+        <div class="col">
+          <p>Pedal position <span id="Vehicle.Chassis.Accelerator.PedalPosition">?</span>%</p>
+        </div>
+        <div class="col">
+          <p>Pedal position <span id="Vehicle.Chassis.Accelerator.PedalPositionAct">?</span>%</p>
+        </div>
       </div>
-    </main>
-    <!-- /.container -->
+
+      <div class="row">
+        <div class="col">
+          <p>Current gear: <span id="Vehicle.Powertrain.Transmission.CurrentGear">?</span></p>
+        </div>
+        <div class="col">
+          <p>Selected gear: <span id="Vehicle.Powertrain.Transmission.SelectedGear">?</span></p>
+        </div>
+      </div>
+    </div>
 
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -89,6 +88,7 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
+    <script src="javascript/gauge.min.js"></script>
     <script src="javascript/scripts.js"></script>
   </body>
 </html>

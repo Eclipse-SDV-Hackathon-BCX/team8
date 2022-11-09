@@ -37,7 +37,7 @@ function setFieldValueType(client, path, value, type) {
   // console.log(setRequest.updates);
 
   client.Set(setRequest, function (err, response) {
-    if (response.errors.length == 0) {
+    if (response && response.errors && response.errors.length == 0) {
       // Success!
       console.log("Set:", path, " FIELD_VALUE: ", value, " OK!");
     } else {
@@ -63,11 +63,11 @@ async function getCurrentValue(client, path, cb) {
       },
     ],
   };
-  client.Get(getRequest, (err, response) => {
+  client.Get(getRequest, (err, resp) => {
     // console.log("Get response:", response.entries[0]);
-    if (response.entries[0].value) {
-      const valueKey = response.entries[0].value.value;
-      cb(response.entries[0].value[valueKey]);
+    if (resp.entries[0].value) {
+      const valueKey = resp.entries[0].value.value;
+      cb(resp.entries[0].value[valueKey]);
     } else {
       cb(undefined);
     }
@@ -93,18 +93,19 @@ async function subscribe(client, path, cb) {
     if (data.updates[0].entry.value) {
       const valueKey = data.updates[0].entry.value.value;
       // console.log(data.updates[0].entry.value[valueKey]);
-      subscribeList[path](data.updates[0].entry.value[valueKey]);
+      subscribeList[path](undefined, data.updates[0].entry.value[valueKey]);
     } else {
-      subscribeList[path](undefined);
+      subscribeList[path](undefined, undefined);
     }
   });
   call.on("end", () => {
     // The server has finished sending
-    console.log("server stopped");
+    console.log("GRPC server stopped the connection.");
   });
   call.on("error", (e) => {
     // An error has occurred and the stream has been closed.
-    console.log("server stopped because of error:", e);
+    console.log("GRPC server stopped because of error:", e);
+    subscribeList[path](e, undefined);
   });
   call.on("status", (status) => {
     // process status

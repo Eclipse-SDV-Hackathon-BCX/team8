@@ -12,7 +12,7 @@ syntax = "proto3";
 
 package kuksa.val.v1;
 
-import "kuksa/val/v1/types.proto";
+import "types.proto";
 
 // Should probably be changed to something like:
 // option go_package = "github.com/eclipse/kuksa.val/proto/v1";

@@ -15,7 +15,7 @@ require("dotenv").config();
 
 const k = require("./components/kuksa-sdk.js");
 
-const PROTO_PATH = "./" + process.env.PROTO_FILES;
+const PROTO_PATH = "./" + process.env.PROTO_FILE;
 // console.log(PROTO_PATH);
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
@@ -30,13 +30,13 @@ const kuksaServerAddress = process.env.KUKSA_SERVER + ":" + process.env.KUKSA_PO
 
 const kuksaClient = new protoDef.VAL(kuksaServerAddress, grpc.credentials.createInsecure());
 
-let counter = 33;
-setInterval(() => {
-  counter++;
-  k.setFieldValue(kuksaClient, "Vehicle.Driver.Identifier.Subject", counter.toString());
-  k.setFieldValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", 45 + counter);
-  k.setFieldValueType(kuksaClient, "Vehicle.Chassis.Accelerator.PedalPosition", +counter, "uint32");
-}, 1000);
+// let counter = 33;
+// setInterval(() => {
+//   counter++;
+//   k.setFieldValue(kuksaClient, "Vehicle.Driver.Identifier.Subject", counter.toString());
+//   // k.setFieldValue(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", counter);
+//   k.setFieldValueType(kuksaClient, "Vehicle.Chassis.Accelerator.PedalPosition", counter, "uint32");
+// }, 10000);
 
 // k.getCurrentValue(kuksaClient, "Vehicle.Driver.Identifier.Subject", (result) => {
 //   console.log("Get current steering angle:", result);
@@ -76,18 +76,27 @@ wss.broadcast = (data) => {
 
 function forwardToBrowser(kuksaClient, path, wsServer) {
   console.log("Register forward:", path);
-  k.subscribe(kuksaClient, path, (data) => {
-    const jsonObj = {
-      path: path,
-      value: data,
-    };
-    wsServer.broadcast(JSON.stringify(jsonObj));
+  k.subscribe(kuksaClient, path, (err, data) => {
+    if (err) {
+      console.error("ERROR: an error happend when subscribing to:", path, err);
+      process.exit(1);
+    } else {
+      const jsonObj = {
+        path: path,
+        value: data,
+      };
+      wsServer.broadcast(JSON.stringify(jsonObj));
+    }
   });
 }
 
 forwardToBrowser(kuksaClient, "Vehicle.Driver.Identifier.Subject", wss);
 forwardToBrowser(kuksaClient, "Vehicle.Chassis.SteeringWheel.Angle", wss);
 forwardToBrowser(kuksaClient, "Vehicle.Chassis.Accelerator.PedalPosition", wss);
+forwardToBrowser(kuksaClient, "Vehicle.Chassis.SteeringWheel.AngleAct", wss);
+forwardToBrowser(kuksaClient, "Vehicle.Chassis.Accelerator.PedalPositionAct", wss);
+forwardToBrowser(kuksaClient, "Vehicle.Powertrain.Transmission.CurrentGear", wss);
+forwardToBrowser(kuksaClient, "Vehicle.Powertrain.Transmission.SelectedGear", wss);
 
 // On an incoming message over Websocket (browser) we need to execute something on the device.
 wss.on("connection", (ws) => {
