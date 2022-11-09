@@ -1,6 +1,5 @@
 @startuml
 
-' !include https://gitlab.iavgroup.local/jweber/iav-design/-/raw/main/iav_style.puml
 
 !define BCW lightgreen
 
