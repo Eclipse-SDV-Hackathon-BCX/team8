@@ -74,7 +74,16 @@ class GrpcClient:
         )
         return response
     
-    def subscribe(self, path, sub_callback):
-        responses = self._stub.Subscribe(SubscribeRequest(entries=[SubscribeEntry(path=path, fields=[Field.FIELD_VALUE])]))
-        
+    def subscribe(self, paths, sub_callback):
+
+        subscribed_topics = []
+
+        for entry in paths:
+
+            subscribed_topics.append(SubscribeEntry(path=entry, fields=[Field.FIELD_VALUE]))
+
+        responses = self._stub.Subscribe(SubscribeRequest(entries=subscribed_topics))
+
+       
+
         sub_callback(responses)

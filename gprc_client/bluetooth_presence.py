@@ -19,22 +19,14 @@ from beacontools import BeaconScanner, EddystoneTLMFrame, EddystoneFilter, Eddys
 
 # configure name spaces from android app Beacon Simulator
 # create 2 EddyStone UID beacons
-BEACON_GOOD_NAMESPACE = "4eb8812131c370b10919"
-BEACON_BAD_NAMESPACE  = "ccf23a2d7eb174a4786a"
+BEACON_GOOD_NAMESPACE = "6e91a77068f83d7e586f"
+BEACON_BAD_NAMESPACE  = "245067ce9125c778c24e"
 
-RSSI_THRESHOLD = -65
 
 state = "good"
 
 DEFAULT_CLOUD_CONNECTOR_ADDRESS = "10.52.204.181"
 DEFAULT_CLOUD_CONNECTOR_PORT = "55555"
-
-
-
-
-
-
-
 
 
 class GrpcClient:
@@ -109,7 +101,6 @@ def callback(bt_addr, rssi, packet, additional_info):
     #print("<%s, %d> %s %s" % (bt_addr, rssi, packet, additional_info))
     print(additional_info["namespace"], rssi)
     if additional_info["namespace"] == BEACON_GOOD_NAMESPACE:
-        if rssi > RSSI_THRESHOLD:
           if state == "bad":
               state = "good"
               print("state change", state)
@@ -117,7 +108,6 @@ def callback(bt_addr, rssi, packet, additional_info):
     
     if state == "good":
         if additional_info["namespace"] == BEACON_BAD_NAMESPACE:
-            if rssi > RSSI_THRESHOLD:
                 if state == "good":
                     state = "bad"
                     print("state change", state)
