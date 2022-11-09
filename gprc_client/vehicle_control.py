@@ -14,20 +14,30 @@ def setThrottle(t):
 
 def setSteering(s):
     car.steering = s / 45.0  
+    print("car.steering", car.steering)
 
-async def sub_callback(stream):
+gear = 1.0 # -1.0 is reverse gear
+
+def sub_callback(stream):
+    global gear
     for item in stream:
-        print(item)
+        if item.updates[0].entry.path == "Vehicle.Chassis.Accelerator.PedalPositionAct":
+            print("Vehicle.Chassis.Accelerator.PedalPositionAct", item.updates[0].entry.value.uint32)
+            setThrottle( gear* float(item.updates[0].entry.value.uint32))
+        elif item.updates[0].entry.path == "Vehicle.Chassis.SteeringWheel.AngleAct":
+            print("Vehicle.Chassis.SteeringWheel.AngleAct", item.updates[0].entry.value.int32)
+            setSteering( item.updates[0].entry.value.int32)
+        elif item.updates[0].entry.path == "Vehicle.Powertrain.Transmission.CurrentGear":
+            print("Vehicle.Powertrain.Transmission.CurrentGear", item.updates[0].entry.value.int32)
+            if item.updates[0].entry.value.int32 < 0:
+                gear = -1.0
+            else:
+                gear = 1.0;
 
-async def main(grpc_client):
-    asyncio.gather(grpc_client.subscribe("Vehicle.Chassis.SteeringWheel.AngleAct", sub_callback))
+def main(grpc_client):
+    grpc_client.subscribe(["Vehicle.Chassis.Accelerator.PedalPositionAct","Vehicle.Chassis.SteeringWheel.AngleAct","Vehicle.Powertrain.Transmission.CurrentGear"],  sub_callback)
+
+
 
 grpc_client = GrpcClient()
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-try:
-    loop.create_task(main(grpc_client))
-    loop.run_forever()
-finally:
-    loop.run_until_complete(loop.shutdown_asyncgens())
-    loop.close()
+main(grpc_client)

@@ -34,9 +34,9 @@ let activeUser = "";
 let userType = "good";
 let acting = false;
 
-let badUsers = [ "32" ];
+let badUsers = [ "bad" ];
 
-let wiggle_time=10
+let wiggle_time=6
 let wiggle_delay = 200;
 let welcome_degree = 30;
 
@@ -65,9 +65,14 @@ let topic = {
 function flee() {
   acting = true
 
-  kuksa.setFieldValue(kuksaClient,topic.accelAct,-welcome_degree)
+  kuksa.setFieldValue(kuksaClient,topic.steerAct,45)
+  kuksa.setFieldValue(kuksaClient,topic.accelAct, 20)
+  kuksa.setFieldValue(kuksaClient,topic.gearAct, 1)
+
+  
   setTimeout( () => {
-    kuksa.setFieldValue(kuksaClient,topic.accelAct,+welcome_degree)
+    kuksa.setFieldValue(kuksaClient,topic.accelAct,0 )
+    kuksa.setFieldValue(kuksaClient,topic.steerAct,0)
     acting = false
   }, wiggle_delay*5 )
 
@@ -100,7 +105,7 @@ function enjoy() {
 
 
 kuksa.subscribe(kuksaClient, "Vehicle.Driver.Identifier.Subject", (data) => {
-  if ( data != null && data != "" && data != activeUser && !acting) {
+  if ( data != undefined && data !== "" && data != activeUser && !acting) {
     console.log("New User: ", data)
     // if user is a bad user flee, otherwise welcome him/her
     if ( badUsers.includes(data)  )  {
@@ -114,7 +119,7 @@ kuksa.subscribe(kuksaClient, "Vehicle.Driver.Identifier.Subject", (data) => {
 });
 
 kuksa.subscribe(kuksaClient, topic.steer, (data) => {
-  if ( data != null && data != "" && !acting ) {
+  if ( data != undefined && data !== "" && !acting ) {
     console.log("Steering Angle: ", data)
     kuksa.setFieldValue(kuksaClient,topic.steerAct,data)
   }
@@ -123,7 +128,7 @@ kuksa.subscribe(kuksaClient, topic.steer, (data) => {
 
 
 kuksa.subscribe(kuksaClient, topic.accel , (data) => {
-  if ( data != null && data != "" && !acting) {
+  if ( data != undefined && data !== "" && !acting) {
     console.log("Accelerator: ", data)
     let dataAct= data
     if (userType === "bad") {
@@ -131,13 +136,15 @@ kuksa.subscribe(kuksaClient, topic.accel , (data) => {
       console.log("Accelerator Limit: ", dataAct)
     }
     kuksa.setFieldValueType(kuksaClient,topic.accelAct,dataAct,"uint32")
+  } else {
+    console.log("Accelerator Faulty:", data)
   }
 });
 
 
 
 kuksa.subscribe(kuksaClient, topic.gear, (data) => {
-  if ( data != null && data != "" && !acting) {
+  if ( data != undefined && data !== "" && !acting) {
     console.log("Transmission: ", data)
     kuksa.setFieldValueType(kuksaClient,topic.gearAct,data,"uint32")
 
