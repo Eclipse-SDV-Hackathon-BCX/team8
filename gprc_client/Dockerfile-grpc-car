@@ -1,0 +1,19 @@
+FROM python:3.10-slim-buster
+
+RUN apt-get update && apt-get install -y git
+
+WORKDIR /tmp/src
+
+RUN pip3 install pipenv
+
+#RUN pip3 install traitlets Jetson.GPIO  Adafruit-Blinka adafruit-circuitpython-lis3dh  install 
+#RUN cd /tmp/ && git clone https://github.com/NVIDIA-AI-IOT/jetracer && \
+#	cd /tmp/jetracer &&  python setup.py install
+
+
+COPY . /tmp/src
+RUN cd /tmp/src && pipenv install 
+RUN cd /tmp/src && pipenv install traitlets Jetson.GPIO  Adafruit-Blinka adafruit-circuitpython-lis3dh
+RUN cd /tmp/src/jetracer && pipenv run python setup.py install
+
+CMD ["pipenv", "run", "python3", "/tmp/src/vehicle_control.py"]
